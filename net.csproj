@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>a b</AssemblyName>
-    <RootNamespace>a b</RootNamespace>
+    <AssemblyName>MSI Central Service (32bit)</AssemblyName>
+    <RootNamespace>MSI_Central_Service</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup>
