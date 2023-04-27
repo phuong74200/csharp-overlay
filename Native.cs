@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Windows;
 
 namespace Native
 {
@@ -7,7 +8,15 @@ namespace Native
   {
     public const int GWL_HWNDPARENT = -8;
   }
-  class user32
+  public static class WM
+  {
+    public const int WM_SYSCOMMAND = 0x0112;
+  }
+  public static class SC
+  {
+    public const int SC_MINIMIZE = 0xf020;
+  }
+  class NativeMethods
   {
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr GetDesktopWindow();
@@ -44,6 +53,14 @@ namespace Native
           wp.flags &= ~SWP_HIDEWINDOW;
           Marshal.StructureToPtr(wp, lParam, true);
           handled = true;
+        }
+        if (msg == WM.WM_SYSCOMMAND)
+        {
+          if (wParam.ToInt32() == SC.SC_MINIMIZE)
+          {
+            MessageBox.Show("Unable to save file, try again.");
+            handled = true;
+          }
         }
       }
 

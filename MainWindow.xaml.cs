@@ -14,21 +14,19 @@ namespace net
   {
 
     static string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-    private const int GWL_EXSTYLE = -20;
-    private const int WS_EX_TOOLWINDOW = 0x00000080;
 
     public MainWindow()
     {
       InitializeComponent();
       this.Topmost = true;
 
-      var desktop = Native.user32.GetDesktopWindow();
-      var hWorkerW = Native.user32.FindWindowEx(desktop, IntPtr.Zero, "WorkerW", null);
-      var hShellViewWin = Native.user32.FindWindowEx(hWorkerW, IntPtr.Zero, "SHELLDLL_DefView", null);
+      var desktop = Native.NativeMethods.GetDesktopWindow();
+      var hWorkerW = Native.NativeMethods.FindWindowEx(desktop, IntPtr.Zero, "WorkerW", null);
+      var hShellViewWin = Native.NativeMethods.FindWindowEx(hWorkerW, IntPtr.Zero, "SHELLDLL_DefView", null);
 
       var helper = new WindowInteropHelper(this);
       var hWnd = helper.Handle;
-      Native.user32.SetWindowLongPtr(hWnd, Native.GWL.GWL_HWNDPARENT, hShellViewWin);
+      Native.NativeMethods.SetWindowLongPtr(hWnd, Native.GWL.GWL_HWNDPARENT, hShellViewWin);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
