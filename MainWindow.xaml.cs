@@ -19,6 +19,8 @@ namespace net
     {
       InitializeComponent();
       this.Topmost = true;
+      this.ShowInTaskbar = false;
+      this.WindowState = WindowState.Normal;
 
       var desktop = Native.NativeMethods.GetDesktopWindow();
       var hWorkerW = Native.NativeMethods.FindWindowEx(desktop, IntPtr.Zero, "WorkerW", null);
