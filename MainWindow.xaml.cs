@@ -1,22 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Internal;
-using External;
-using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using Native;
 
 namespace net
 {
@@ -34,6 +21,14 @@ namespace net
     {
       InitializeComponent();
       this.Topmost = true;
+
+      var desktop = Native.user32.GetDesktopWindow();
+      var hWorkerW = Native.user32.FindWindowEx(desktop, IntPtr.Zero, "WorkerW", null);
+      var hShellViewWin = Native.user32.FindWindowEx(hWorkerW, IntPtr.Zero, "SHELLDLL_DefView", null);
+
+      var helper = new WindowInteropHelper(this);
+      var hWnd = helper.Handle;
+      Native.user32.SetWindowLongPtr(hWnd, Native.GWL.GWL_HWNDPARENT, hShellViewWin);
     }
 
     protected override void OnSourceInitialized(EventArgs e)

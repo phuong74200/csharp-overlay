@@ -1,24 +1,23 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Internal;
-using External;
 using System.Runtime.InteropServices;
-using System.Windows.Interop;
 
 namespace Native
 {
+  public static class GWL
+  {
+    public const int GWL_HWNDPARENT = -8;
+  }
+  class user32
+  {
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr GetDesktopWindow();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+    [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtr")]
+    public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+  }
   class Message
   {
     [StructLayout(LayoutKind.Sequential)]
