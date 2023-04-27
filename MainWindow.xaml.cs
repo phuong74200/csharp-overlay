@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.ServiceProcess;
+using System.Threading;
 
 namespace net
 {
@@ -13,9 +14,27 @@ namespace net
   /// </summary>
   public partial class MyService : ServiceBase
   {
+    private Thread _thread;
+    private net.MainWindow _wpfApp;
 
+    protected override void OnStart(string[] args)
+    {
+      _thread = new Thread(() =>
+      {
+        _wpfApp = new net.MainWindow();
+        _wpfApp.Run();
+      });
+      _thread.Start();
+    }
 
+    protected override void OnStop()
+    {
+      _wpfApp.Shutdown();
+      _thread.Join();
+    }
   }
+
+
   public partial class MainWindow : Window
   {
 
