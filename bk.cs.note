@@ -1,0 +1,324 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using Internal;
+using External;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
+using System;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.IO;
+using System.Drawing.Imaging;
+
+using System.Runtime.InteropServices;
+
+
+namespace net
+{
+  internal static class NativeMethods
+  {
+    public delegate IntPtr LowLevelKeyboardProc(
+    int nCode, IntPtr wParam, IntPtr lParam);
+    public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+    public const int WM_SHOWWINDOW = 0x0018;
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern int GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    public struct CWPSTRUCT
+    {
+      public IntPtr lParam;
+      public IntPtr wParam;
+      public uint message;
+      public IntPtr hwnd;
+    }
+  }
+  /// <summary>
+  /// Interaction logic for MainWindow.xaml
+  /// </summary>
+  public partial class MainWindow : Window
+  {
+
+    static string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+    private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_TOOLWINDOW = 0x00000080;
+
+    private const int GWLP_HWNDPARENT = -8;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr GetDesktopWindow();
+
+    public MainWindow()
+    {
+      InitializeComponent();
+
+      this.Topmost = true;
+
+      this.SourceInitialized += MainWindow_SourceInitialized;
+
+      // Find the parent window
+      var desktop = GetDesktopWindow();
+      var hWorkerW = FindWindowEx(desktop, IntPtr.Zero, "WorkerW", null);
+      var hShellViewWin = FindWindowEx(hWorkerW, IntPtr.Zero, "SHELLDLL_DefView", null);
+
+      // Set the parent of the WPF window
+      var helper = new WindowInteropHelper(this);
+      var hWnd = helper.Handle;
+      SetWindowLongPtr(hWnd, GWLP_HWNDPARENT, hShellViewWin);
+    }
+
+    private HwndSource hwndSource;
+
+    private void MainWindow_SourceInitialized(object sender, EventArgs e)
+    {
+      // Create a new HwndSource object for the window
+      hwndSource = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
+
+      // Add the hook for the window
+      hwndSource.AddHook(ProcessMessage);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WindowPos
+    {
+      public IntPtr hwnd;
+      public IntPtr hwndInsertAfter;
+      public int x;
+      public int y;
+      public int cx;
+      public int cy;
+      public uint flags;
+    }
+
+    [Flags]
+    public enum WindowStyles : long
+    {
+      WS_OVERLAPPED = 0x00000000L,
+      WS_POPUP = 0x80000000L,
+      WS_CHILD = 0x40000000L,
+      WS_MINIMIZE = 0x20000000L,
+      WS_VISIBLE = 0x10000000L,
+      WS_DISABLED = 0x08000000L,
+      WS_CLIPSIBLINGS = 0x04000000L,
+      WS_CLIPCHILDREN = 0x02000000L,
+      WS_MAXIMIZE = 0x01000000L,
+      WS_CAPTION = 0x00C00000L,
+      WS_BORDER = 0x00800000L,
+      WS_DLGFRAME = 0x00400000L,
+      WS_VSCROLL = 0x00200000L,
+      WS_HSCROLL = 0x00100000L,
+      WS_SYSMENU = 0x00080000L,
+      WS_THICKFRAME = 0x00040000L,
+      WS_GROUP = 0x00020000L,
+      WS_TABSTOP = 0x00010000L,
+      WS_MINIMIZEBOX = 0x00020000L,
+      WS_MAXIMIZEBOX = 0x00010000L,
+      WS_EX_DLGMODALFRAME = 0x00000001L,
+      WS_EX_CLIENTEDGE = 0x00000200L,
+      WS_EX_STATICEDGE = 0x00020000L,
+      WS_EX_WINDOWEDGE = 0x00000100L,
+      WS_EX_TOOLWINDOW = 0x00000080L,
+      WS_EX_TOPMOST = 0x00000008L,
+      WS_EX_LAYERED = 0x00080000L,
+      WS_EX_TRANSPARENT = 0x00000020L,
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+    public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [Flags]
+    public enum SetWindowPosFlags : uint
+    {
+      SWP_ASYNCWINDOWPOS = 0x4000,
+      SWP_DEFERERASE = 0x2000,
+      SWP_DRAWFRAME = 0x0020,
+      SWP_FRAMECHANGED = 0x0020,
+      SWP_HIDEWINDOW = 0x0080,
+      SWP_NOACTIVATE = 0x0010,
+      SWP_NOCOPYBITS = 0x0100,
+      SWP_NOMOVE = 0x0002,
+      SWP_NOOWNERZORDER = 0x0200,
+      SWP_NOREDRAW = 0x0008,
+      SWP_NOREPOSITION = 0x0200,
+      SWP_NOSENDCHANGING = 0x0400,
+      SWP_NOSIZE = 0x0001,
+      SWP_NOZORDER = 0x0004,
+      SWP_SHOWWINDOW = 0x0040,
+      SWP_NOCLIENTSIZE = 0x0800,
+      SWP_NOCLIENTMOVE = 0x1000,
+    }
+
+    private const int GWL_STYLE = -16;
+
+    private IntPtr ProcessMessage(IntPtr windowHandle, int msg, IntPtr wideParam, IntPtr leftParam, ref bool handled)
+    {
+      int windowsMessage = msg;
+
+      switch (windowsMessage)
+      {
+        case 0x0046:
+          {
+            WindowPos windowPos = (WindowPos)Marshal.PtrToStructure(leftParam, typeof(WindowPos));
+
+            if (true)
+            {
+
+
+              WindowStyles styles = (WindowStyles)GetWindowLongPtr(windowHandle, GWL_STYLE);
+
+              windowPos.flags |= (uint)SetWindowPosFlags.SWP_NOSIZE | (uint)SetWindowPosFlags.SWP_NOMOVE;
+              SetWindowLongPtr(new WindowInteropHelper(this).Handle, GWL_STYLE, (IntPtr)(long)(styles ^ WindowStyles.WS_MAXIMIZE));
+              handled = true;
+              Marshal.StructureToPtr(windowPos, leftParam, true);
+            }
+
+            break;
+          }
+      }
+
+      return IntPtr.Zero;
+    }
+
+    private const int WH_CALLWNDPROC = 4;
+    private const int HC_ACTION = 0;
+    private const int WM_HIDE = 0x008B;
+
+    private delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+    private HookProc hookProc;
+    private IntPtr hookId;
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr SetWindowsHookEx(int idHook, MainWindow.HookProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+      base.OnSourceInitialized(e);
+
+      var hwnd = new WindowInteropHelper(this).Handle;
+      var threadId = NativeMethods.GetWindowThreadProcessId(hwnd, IntPtr.Zero);
+      hookProc = HookCallback;
+      hookId = SetWindowsHookEx(WH_CALLWNDPROC, hookProc, IntPtr.Zero, (uint)threadId);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+      if (hookId != IntPtr.Zero)
+      {
+        NativeMethods.UnhookWindowsHookEx(hookId);
+      }
+
+      base.OnClosed(e);
+    }
+
+    private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+    {
+      if (nCode == HC_ACTION)
+      {
+        var msg = Marshal.PtrToStructure<NativeMethods.CWPSTRUCT>(lParam);
+        if (msg.message == WM_HIDE && msg.hwnd == new WindowInteropHelper(this).Handle)
+        {
+          return new IntPtr(1);
+        }
+      }
+
+      return NativeMethods.CallNextHookEx(hookId, nCode, wParam, lParam);
+    }
+
+    private static bool IsNoClientAction(WindowPos windowPos)
+    {
+      return ((uint)windowPos.flags & (uint)SetWindowPosFlags.SWP_NOCLIENTSIZE) != 0 || ((uint)windowPos.flags & (uint)SetWindowPosFlags.SWP_NOCLIENTMOVE) != 0;
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+      InputTextBox.Focus();
+      if (Internal.Utils.IsDebug())
+      {
+        this.Background.Opacity = 0.5;
+      }
+    }
+
+    private void myTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      BrushConverter bc = new BrushConverter();
+
+      if (e.Key == Key.Return)
+      {
+        string text = InputTextBox.Text;
+
+        // Create a new TextBlock element with the entered text
+        TextBox textBox = new TextBox();
+        textBox.Text = text;
+
+        // Style the text block
+        textBox.IsReadOnly = true;
+        textBox.BorderThickness = new Thickness(0);
+        textBox.Background = (Brush)bc.ConvertFrom("#01000000")!;
+        textBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        textBox.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+        textBox.TextWrapping = TextWrapping.Wrap;
+
+        OutputStack.Children.Add(textBox);
+        InputTextBox.Clear();
+        textBox.BringIntoView();
+
+        Internal.API.reflector(text, textBox);
+
+        //External.Test.Exec(text, textBox);
+
+        e.Handled = true;
+      }
+    }
+
+    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      // If the user clicked the left mouse button, initiate window dragging
+      if (e.ButtonState == MouseButtonState.Pressed && e.ChangedButton == MouseButton.Left)
+      {
+        // Use the DragMove method to move the window
+        DragMove();
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+﻿<Window x:Class="net.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:net"
+    mc:Ignorable="d"
+    Title="MainWindow"
+    Height="450"
+    Width="800"
+    AllowsTransparency="True"
+    WindowStyle="None"
+    Loaded="Window_Loaded"
+    MouseLeftButtonDown="Window_MouseLeftButtonDown"
+    FontFamily="Microsoft Sans Serif"
+>
+    <Window.Background>
+        <SolidColorBrush Opacity="0.002" Color="White" />
+    </Window.Background>
+    <Grid Height="Auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ScrollViewer
+            Grid.Row="0"
+            MaxHeight="200"
+            Name="OutputScrollViewer"
+            VerticalScrollBarVisibility="Hidden"
+        >
+            <StackPanel Name="OutputStack" />
+        </ScrollViewer>
+        <TextBox Grid.Row="2"
+            Name="InputTextBox"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            PreviewKeyDown="myTextBox_PreviewKeyDown"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,0"
+            TextWrapping="Wrap"
+            AcceptsReturn="True"
+            Text="{Binding MyText}"
+            BorderThickness="0"
+            Background="#01000000" BorderBrush="Transparent"
+            CaretBrush="Black"
+        />
+    </Grid>
+</Window>
