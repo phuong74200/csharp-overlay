@@ -58,7 +58,7 @@ namespace External
       request.AddJsonBody(new
       {
         prompt = _prompt,
-        max_tokens = 50
+        max_tokens = 400
       });
 
       // Send the request and get the response
