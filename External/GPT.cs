@@ -25,11 +25,11 @@ namespace External
     public string Object { get; set; }
     public long Created { get; set; }
     public string Model { get; set; }
-    public List<CompletionChoice> Choices { get; set; }
+    public List<CompletionChoice> choices { get; set; }
 
     public class CompletionChoice
     {
-      public string Text { get; set; }
+      public string text { get; set; }
       public int Index { get; set; }
       public object Logprobs { get; set; }
       public string FinishReason { get; set; }
@@ -42,7 +42,7 @@ namespace External
   }
   class GPT
   {
-    public static async Task<string> prompt()
+    public static async Task<string> prompt(string _prompt)
     {
       var clientOptions = new RestClientOptions
       {
@@ -57,7 +57,7 @@ namespace External
       var request = new RestRequest("engines/text-davinci-003/completions", Method.Post);
       request.AddJsonBody(new
       {
-        prompt = "Hello, ChatGPT!",
+        prompt = _prompt,
         max_tokens = 50
       });
 
@@ -65,9 +65,9 @@ namespace External
       var response = await client.ExecuteAsync(request);
       if (response.IsSuccessful)
       {
-        // dynamic data = JsonConvert.DeserializeObject<TextCompletionResponse>(response.Content);
-        // string output = data.choices[0].text;
-        return response.Content;
+        dynamic data = JsonConvert.DeserializeObject<TextCompletionResponse>(response.Content);
+        string output = data.choices[0].text;
+        return output;
       }
       else
       {
@@ -79,10 +79,16 @@ namespace External
     {
       try
       {
-        textBox.Text += "\nprompt:" + options.Prompt;
-        string data = await prompt();
-        textBox.Text += "\n" + data;
-        textBox.BringIntoView();
+        if (string.IsNullOrEmpty(options.Prompt))
+        {
+          textBox.Text += "\nEmpty prompt";
+        }
+        else
+        {
+          string data = await prompt(options.Prompt);
+          textBox.Text += data;
+          textBox.BringIntoView();
+        }
       }
       catch (Exception e)
       {
