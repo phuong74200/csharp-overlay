@@ -4,12 +4,35 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 
 namespace net
 {
   /// <summary>
   /// Interaction logic for MainWindow.xaml
   /// </summary>
+  public partial class MyService : ServiceBase
+  {
+    private Thread _thread;
+    private MyWpfApp _wpfApp;
+
+    protected override void OnStart(string[] args)
+    {
+      _thread = new Thread(() =>
+      {
+        _wpfApp = new MyWpfApp();
+        _wpfApp.Run();
+      });
+      _thread.Start();
+    }
+
+    protected override void OnStop()
+    {
+      _wpfApp.Shutdown();
+      _thread.Join();
+    }
+  }
   public partial class MainWindow : Window
   {
 
