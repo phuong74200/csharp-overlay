@@ -19,11 +19,12 @@
     </Window.Background>
     <Grid Height="Auto">
         <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ScrollViewer
-            Grid.Row="0"
+            Grid.Row="1"
             MaxHeight="200"
             Name="OutputScrollViewer"
             VerticalScrollBarVisibility="Hidden"

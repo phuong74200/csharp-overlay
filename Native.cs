@@ -11,6 +11,7 @@ namespace Native
   public static class WM
   {
     public const int WM_SYSCOMMAND = 0x0112;
+    public const int WM_ENABLE = 0x000A;
   }
   public static class SC
   {
@@ -62,6 +63,12 @@ namespace Native
         {
           handled = true;
         }
+      }
+
+      if (msg == WM.WM_ENABLE)
+      {
+        MessageBox.Show("Enable");
+        handled = true;
       }
 
       return IntPtr.Zero;
