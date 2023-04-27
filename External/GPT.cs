@@ -51,7 +51,7 @@ namespace External
 
       // Create the RestClient instance
       var client = new RestClient(clientOptions);
-      client.AddDefaultHeader("Authorization", string.Format("Bearer {0}", "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"));
+      client.AddDefaultHeader("Authorization", string.Format("Bearer {0}", "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"));
 
       // Set up the request
       var request = new RestRequest("engines/text-davinci-003/completions", Method.Post);

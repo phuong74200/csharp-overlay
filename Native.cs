@@ -28,6 +28,9 @@ namespace Native
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
   }
   class Message
   {
@@ -46,6 +49,8 @@ namespace Native
     {
       const int WM_WINDOWPOSCHANGING = 0x0046;
       const uint SWP_HIDEWINDOW = 0x0080;
+
+      NativeMethods.ShowWindow(hwnd, 5);
 
       if (msg == WM_WINDOWPOSCHANGING)
       {
