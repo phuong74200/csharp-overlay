@@ -16,6 +16,8 @@ namespace External
     {
       [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
       public int Verbose { get; set; }
+      [Option('p', "prompt", Required = false, HelpText = "Set output to verbose messages.")]
+      public string Prompt { get; set; }
     }
 
     class Todo
@@ -33,6 +35,7 @@ namespace External
         string data = await HttpRequest.Fetch(apiUrl);
         Todo todo = JsonConvert.DeserializeObject<Todo>(data);
         textBox.Text += "\n" + todo.title;
+        textBox.Text += "\n" + options.Prompt;
         textBox.BringIntoView();
       }
       catch (Exception e)
@@ -43,6 +46,7 @@ namespace External
 
     static void OnError(IEnumerable<Error> errs, TextBox textBox)
     {
+      textBox.Text += errs.ToString();
       // return false;
     }
 

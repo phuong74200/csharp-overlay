@@ -21,12 +21,13 @@ namespace Native
   {
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr GetDesktopWindow();
-
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-
     [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtr")]
     public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
   }
   class Message
   {
@@ -67,7 +68,7 @@ namespace Native
 
       if (msg == WM.WM_ENABLE)
       {
-        MessageBox.Show("Enable");
+        NativeMethods.EnableWindow(hwnd, true);
         handled = true;
       }
 
