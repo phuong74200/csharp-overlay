@@ -13,6 +13,7 @@
     Loaded="Window_Loaded"
     MouseLeftButtonDown="Window_MouseLeftButtonDown"
     FontFamily="Microsoft Sans Serif"
+    FontSize="10"
 >
     <Window.Background>
         <SolidColorBrush Opacity="0.002" Color="White" />
