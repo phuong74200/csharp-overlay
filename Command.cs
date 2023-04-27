@@ -30,7 +30,7 @@ namespace Internal
 
     public static bool reflector(string str, TextBox textBox)
     {
-      string[] tokens = str.Split();
+      string[] tokens = CommandLineAPI.CommandLineToArgs(str);
       string[] args = tokens.Skip(1).Take(tokens.Length - 1).ToArray();
       string executor = tokens[0];
       return exec(executor, args, textBox);
