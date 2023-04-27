@@ -54,13 +54,13 @@ namespace Native
           Marshal.StructureToPtr(wp, lParam, true);
           handled = true;
         }
-        if (msg == WM.WM_SYSCOMMAND)
+      }
+
+      if (msg == WM.WM_SYSCOMMAND)
+      {
+        if (wParam.ToInt32() == SC.SC_MINIMIZE)
         {
-          if (wParam.ToInt32() == SC.SC_MINIMIZE)
-          {
-            MessageBox.Show("Unable to save file, try again.");
-            handled = true;
-          }
+          handled = true;
         }
       }
 
